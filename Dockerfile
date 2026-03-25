@@ -1,6 +1,4 @@
 FROM openjdk:17
 WORKDIR /app
-COPY Hello.java .
-RUN javac Hello.java
+COPY Hello.class .
 CMD ["java", "Hello"]
- 
