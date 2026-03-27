@@ -8,27 +8,27 @@ pipeline {
             }
         }
  
-        stage('Build') {
+        stage('Build Image') {
             steps {
-                sh 'javac Hello.java'
+                sh 'docker build -t java-poc:v1 .'
             }
         }
  
-        stage('Test') {
+        stage('Test Inside Container') {
             steps {
-                sh 'java Hello | grep "WebHook Works test"'
+                sh '''
+                docker run --rm java-poc:v1 sh -c "java Hello | grep 'WebHook Works test'"
+                '''
             }
         }
  
         stage('Deploy') {
             steps {
-                sh 'docker build -t java-poc:v1 .'
                 sh '''
                 docker rm -f java-poc-container || true
-                docker run --name java-poc-container java-poc:v1
+                docker run -d --name java-poc-container java-poc:v1
                 '''
             }
         }
     }
 }
- 
