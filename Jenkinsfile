@@ -43,13 +43,13 @@ pipeline {
             }
         }
      
-        stage('Deploy') {
-            steps {
-                sh '''
-                docker rm -f java-poc-container || true
-                docker run -d --name java-poc-container java-poc:v1
-                '''
-            }
+       stage('Deploy') {
+        steps {
+            sh '''
+            docker rm -f java-poc-container || true
+            docker run -d -p 8080:8080 --name java-poc-container java-poc:v1
+            '''
         }
+    }
     }
 }
