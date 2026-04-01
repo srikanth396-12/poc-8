@@ -1,0 +1,11 @@
+---
+- name: Deploy Java Docker container
+  hosts: target
+  become: yes
+ 
+  tasks:
+    - name: Stop old container if exists
+      shell: docker rm -f java-poc-container || true
+ 
+    - name: Run new container
+      shell: docker run -d --name java-poc-container java-poc:v1
