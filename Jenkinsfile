@@ -4,46 +4,20 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                checkout scm 
+                checkout scm
             }
         }
  
-        stage('Build Image') {
+        stage('Build Docker Image') {
             steps {
                 sh 'docker build -t java-poc:v1 .'
             }
         }
  
-         stage('Sonar Scan') {
+        stage('Deploy using Ansible') {
             steps {
-                withSonarQubeEnv('SonarCloud') {
-                    withCredentials([string(credentialsId: 'sonartoken', variable: 'SONAR_TOKEN')]) {
-                        sh '''
-                        export SONAR_SCANNER_VERSION=8.0.1.6346
-                        export SONAR_SCANNER_HOME=$HOME/.sonar/sonar-scanner-$SONAR_SCANNER_VERSION-linux-x64
-                        curl --create-dirs -sSLo $HOME/.sonar/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-$SONAR_SCANNER_VERSION-linux-x64.zip
-                        unzip -o $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
-                        export PATH=$SONAR_SCANNER_HOME/bin:$PATH
-         
-                        sonar-scanner \
-                          -Dsonar.organization=srikanth396-12 \
-                          -Dsonar.projectKey=srikanth396-12_poc-8 \
-                          -Dsonar.sources=. \
-                          -Dsonar.host.url=https://sonarcloud.io \
-                          -Dsonar.token=$SONAR_TOKEN
-                        '''
-                    }
-                }
+                sh 'ansible-playbook -i inventory.ini deploy.yml'
             }
         }
-     
-       stage('Deploy') {
-        steps {
-            sh '''
-            docker rm -f java-poc-container || true
-            docker run -d -p 8081:8080 --name java-poc-container java-poc:v1
-            '''
-        }
-    }
     }
 }
